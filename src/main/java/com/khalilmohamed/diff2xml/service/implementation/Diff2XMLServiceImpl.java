@@ -14,9 +14,7 @@ import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
-import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathExpressionException;
-import javax.xml.xpath.XPathFactory;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -43,7 +41,12 @@ public class Diff2XMLServiceImpl implements Diff2XMLService {
                                                     SECOND_FROM_PATH);
         }
 
-        return XMLUtils.convertDocumentToString(docOutput).replace("&lt;", "<").replace("&gt;",">");
+        if(XMLUtils.convertDocumentToString(docOutput) != null)
+            return XMLUtils.convertDocumentToString(docOutput)
+                    .replace("&lt;", "<")
+                    .replace("&gt;",">");
+        else
+            return "";
     }
 
     private List<Difference> getAllDifferences(String xmlFirst, String xmlSecond) throws IOException, SAXException {
