@@ -5,9 +5,7 @@ import com.khalilmohamed.diff2xml.service.Diff2XMLService;
 import com.khalilmohamed.diff2xml.utils.FileUtils;
 import com.khalilmohamed.diff2xml.utils.XMLUtils;
 import com.khalilmohamed.diff2xml.utils.diff_match_patch;
-import org.custommonkey.xmlunit.DetailedDiff;
 import org.custommonkey.xmlunit.Difference;
-import org.custommonkey.xmlunit.XMLUnit;
 import org.springframework.stereotype.Service;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
@@ -34,7 +32,7 @@ public class Diff2XMLServiceImpl implements Diff2XMLService {
         Document docOutput = XMLUtils.createDocumentFromPath(SECOND_FROM_PATH);
 
         //Get all differences between two xml using XMLUnit and build diffObjects using diff_match_patch
-        List<Difference> allDifferences = getAllDifferences(xmlFirst,xmlSecond);
+        List<Difference> allDifferences = XMLUtils.getAllDifferences(xmlFirst,xmlSecond);
         List<DiffObject> diffObjects = buildDiffObjects(allDifferences);
 
         //For each diffObjects, replace the node with the "git commit" visualization
@@ -53,15 +51,6 @@ public class Diff2XMLServiceImpl implements Diff2XMLService {
                     .replace("&gt;",">");
         else
             return "";
-    }
-
-    private List<Difference> getAllDifferences(String xmlFirst, String xmlSecond) throws IOException, SAXException {
-        XMLUnit.setIgnoreWhitespace(true);
-        XMLUnit.setIgnoreAttributeOrder(true);
-
-        DetailedDiff diff = new DetailedDiff(XMLUnit.compareXML(xmlFirst, xmlSecond));
-
-        return diff.getAllDifferences();
     }
 
     private List<DiffObject> buildDiffObjects(List<Difference> differences){

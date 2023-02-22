@@ -1,5 +1,8 @@
 package com.khalilmohamed.diff2xml.utils;
 
+import org.custommonkey.xmlunit.DetailedDiff;
+import org.custommonkey.xmlunit.Difference;
+import org.custommonkey.xmlunit.XMLUnit;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
@@ -18,6 +21,7 @@ import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 import java.io.IOException;
 import java.io.StringWriter;
+import java.util.List;
 
 public class XMLUtils {
 
@@ -49,5 +53,14 @@ public class XMLUtils {
         }
 
         return null;
+    }
+
+    public static List<Difference> getAllDifferences(String xmlFirst, String xmlSecond) throws IOException, SAXException {
+        XMLUnit.setIgnoreWhitespace(true);
+        XMLUnit.setIgnoreAttributeOrder(true);
+
+        DetailedDiff diff = new DetailedDiff(XMLUnit.compareXML(xmlFirst, xmlSecond));
+
+        return diff.getAllDifferences();
     }
 }
