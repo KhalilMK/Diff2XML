@@ -1,5 +1,8 @@
 # Diff2XML
 
+![Version](https://img.shields.io/badge/version-1.0.0-success)
+![License](https://img.shields.io/github/license/UnimibSoftEngCourse2022/progetto-questionari-1-dev-team)
+
 Exercise project that generate a third xml containing the differences between two given xml. The differences will be shown like the "Git Commit" visualization.
 
 For example:
