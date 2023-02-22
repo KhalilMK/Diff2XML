@@ -13,7 +13,6 @@ import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.TransformerException;
 import javax.xml.xpath.XPathExpressionException;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -26,7 +25,7 @@ public class Diff2XMLServiceImpl implements Diff2XMLService {
     private final String FIRST_FROM_PATH = "C:\\Users\\HOME\\Documents\\diff2xml\\src\\main\\resources\\input\\xmlFirst.xml";
     private final String SECOND_FROM_PATH = "C:\\Users\\HOME\\Documents\\diff2xml\\src\\main\\resources\\input\\xmlSecond.xml";
     @Override
-    public String getDiffXML() throws IOException, SAXException, ParserConfigurationException, XPathExpressionException, TransformerException {
+    public String getDiffXML() throws IOException, SAXException, ParserConfigurationException, XPathExpressionException {
         String xmlFirst = FileUtils.readFile(FIRST_FROM_PATH);
         String xmlSecond = FileUtils.readFile(SECOND_FROM_PATH);
         Document docOutput = XMLUtils.createDocumentFromPath(SECOND_FROM_PATH);
