@@ -55,28 +55,25 @@ public class XMLUtils {
     }
 
     public static List<Difference> getAllDifferences(String xmlFirst, String xmlSecond) {
-        ElementSelector build1 = ElementSelectors.conditionalBuilder()
-                .whenElementIsNamed("property")
-                .thenUse(ElementSelectors.byNameAndAttributes("code"))
-                .elseUse(ElementSelectors.byName).build();
-
-        ElementSelector build2 = ElementSelectors.conditionalBuilder()
-                .whenElementIsNamed("tab")
-                .thenUse(ElementSelectors.byNameAndAttributes("id"))
-                .elseUse(ElementSelectors.byName).build();
-
-        ElementSelector build3 = ElementSelectors.conditionalBuilder()
-                .whenElementIsNamed("field")
-                .thenUse(ElementSelectors.byNameAndAttributes("code"))
-                .elseUse(ElementSelectors.byName).build();
+        ElementSelector field = buildElementSelector("field", "code", ElementSelectors.byName);
+        ElementSelector tab  = buildElementSelector("tab", "id", field);
+        ElementSelector property = buildElementSelector("property", "code", tab);
 
         Diff diff = DiffBuilder
                         .compare(xmlFirst)
                         .withTest(xmlSecond)
                         .ignoreWhitespace().ignoreElementContentWhitespace().ignoreComments()
-                        .withNodeMatcher(new DefaultNodeMatcher(ElementSelectors.and(build1,build3,build2)))
+                        .withNodeMatcher(new DefaultNodeMatcher(property))
                         .build();
 
         return (List<Difference>) diff.getDifferences();
+    }
+
+    public static ElementSelector buildElementSelector(String elementName, String attribute, ElementSelector innerSel){
+        //Two nodes with a given name are comparable if they have the same value of a given attribute or if they satisfy the innerselector
+        return ElementSelectors.conditionalBuilder()
+                .whenElementIsNamed(elementName)
+                .thenUse(ElementSelectors.byNameAndAttributes(attribute))
+                .elseUse(innerSel).build();
     }
 }
