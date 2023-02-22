@@ -37,8 +37,8 @@ public class Diff2XMLServiceImpl implements Diff2XMLService {
         for(DiffObject d : diffObjects){
             XMLUtils.createDifferenceNodeFromString(convertDiffObjectToXML(d),
                                                     d.getXpathLocation(),
-                                                    docOutput,
-                                                    SECOND_FROM_PATH);
+                                                    docOutput
+            );
         }
 
         if(XMLUtils.convertDocumentToString(docOutput) != null)

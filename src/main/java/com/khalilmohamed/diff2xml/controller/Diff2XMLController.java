@@ -23,6 +23,6 @@ public class Diff2XMLController {
     public ResponseEntity<String> getDiffXML() throws IOException, SAXException, ParserConfigurationException, XPathExpressionException, TransformerException {
         String newXML = diff2XMLService.getDiffXML();
 
-        return new ResponseEntity(newXML, HttpStatus.OK);
+        return new ResponseEntity<>(newXML, HttpStatus.OK);
     }
 }

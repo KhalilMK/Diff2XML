@@ -21,7 +21,7 @@ import java.io.StringWriter;
 
 public class XMLUtils {
 
-    public static void createDifferenceNodeFromString(String stringNode, String xPathLocation, Document document, String outputPath) throws TransformerException, XPathExpressionException {
+    public static void createDifferenceNodeFromString(String stringNode, String xPathLocation, Document document) throws XPathExpressionException {
         XPath xpath = XPathFactory.newInstance().newXPath();
 
         NodeList nodes = (NodeList) xpath.evaluate(xPathLocation, document, XPathConstants.NODESET);
