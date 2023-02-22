@@ -26,19 +26,25 @@ public class Diff2XMLServiceImpl implements Diff2XMLService {
     private final String SECOND_FROM_PATH = "C:\\Users\\HOME\\Documents\\diff2xml\\src\\main\\resources\\input\\xmlSecond.xml";
     @Override
     public String getDiffXML() throws IOException, SAXException, ParserConfigurationException, XPathExpressionException {
+        //Read the content of the two files xml
         String xmlFirst = FileUtils.readFile(FIRST_FROM_PATH);
         String xmlSecond = FileUtils.readFile(SECOND_FROM_PATH);
+
+        //Create DOCUMENT of the second file (output)
         Document docOutput = XMLUtils.createDocumentFromPath(SECOND_FROM_PATH);
 
+        //Get all differences between two xml using XMLUnit and build diffObjects using diff_match_patch
         List<Difference> allDifferences = getAllDifferences(xmlFirst,xmlSecond);
         List<DiffObject> diffObjects = buildDiffObjects(allDifferences);
 
+        //For each diffObjects, replace the node with the "git commit" visualization
         for(DiffObject d : diffObjects){
             XMLUtils.createDifferenceNodeFromString(convertDiffObjectToXML(d),
                                                     d.getXpathLocation(),
                                                     docOutput);
         }
 
+        //Convert the document with the "git commit" visualization to string replacing the new escape characters
         if(XMLUtils.convertDocumentToString(docOutput) != null)
             return XMLUtils.convertDocumentToString(docOutput)
                     .replace("&lt;", "<")
