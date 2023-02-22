@@ -1,14 +1,13 @@
 package com.khalilmohamed.diff2xml.service.implementation;
 
-import com.khalilmohamed.diff2xml.model.DiffObject;
 import com.khalilmohamed.diff2xml.service.Diff2XMLService;
 import com.khalilmohamed.diff2xml.utils.FileUtils;
 import com.khalilmohamed.diff2xml.utils.XMLUtils;
 import com.khalilmohamed.diff2xml.utils.diff_match_patch;
 import org.springframework.stereotype.Service;
 import org.w3c.dom.Document;
+import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
-import org.xmlunit.diff.ComparisonType;
 import org.xmlunit.diff.Difference;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -30,55 +29,77 @@ public class Diff2XMLServiceImpl implements Diff2XMLService {
         String xmlSecond = FileUtils.readFile(SECOND_FROM_PATH);
 
         //Create DOCUMENT of the second file (output)
-        Document docOutput = XMLUtils.createDocumentFromPath(SECOND_FROM_PATH);
+        Document docFirst = XMLUtils.createDocumentFromPath(FIRST_FROM_PATH);
+        Document docSecond = XMLUtils.createDocumentFromPath(SECOND_FROM_PATH);
 
         //Get all differences between two xml using XMLUnit and build diffObjects using diff_match_patch
         List<Difference> allDifferences = XMLUtils.getAllDifferences(xmlFirst,xmlSecond);
-        List<DiffObject> diffObjects = buildDiffObjects(allDifferences);
+        List<Difference> valueDifferences = new ArrayList<>();
+        List<Difference> insNodesDiff = new ArrayList<>();
+        List<Difference> delNodesDiff = new ArrayList<>();
+        List<Node> duplicateNodes = new ArrayList<>();
 
-        //For each diffObjects, replace the node with the "git commit" visualization
-        for(DiffObject d : diffObjects){
-            if(d.getXpathLocation() != null){
-                XMLUtils.createDifferenceNodeFromString(convertDiffObjectToXML(d),
-                                                        d.getXpathLocation(),
-                                                        docOutput);
+        buildDiffLists(allDifferences, valueDifferences, insNodesDiff, delNodesDiff);
+
+        //For each Difference object, replace the node with the "git commit" visualization
+        for(Difference d : valueDifferences){
+            if(d.getComparison().getTestDetails().getXPath() != null){
+                XMLUtils.getNodeInDocByXPath(d.getComparison().getTestDetails().getXPath(),docSecond)
+                        .setTextContent(convertDiffObjectToXML(d));
             }
         }
 
+        for(Difference d : delNodesDiff){
+            XMLUtils.createDiffNode(docFirst,
+                    docSecond,
+                    d.getComparison().getControlDetails().getXPath(),
+                    d.getComparison().getTestDetails().getParentXPath(), "del");
+        }
+
+        for(Difference d : insNodesDiff){
+            duplicateNodes.add(XMLUtils.createDiffNode(docSecond,
+                    docSecond,
+                    d.getComparison().getTestDetails().getXPath(),
+                    d.getComparison().getTestDetails().getParentXPath(),"ins"));
+        }
+
+        //Clear DOCUMENT from duplicate nodes
+        clearDuplicateNodes(duplicateNodes);
+
         //Convert the document with the "git commit" visualization to string replacing the new escape characters
-        if(XMLUtils.convertDocumentToString(docOutput) != null)
-            return XMLUtils.convertDocumentToString(docOutput)
+        if(XMLUtils.convertDocumentToString(docSecond) != null)
+            return XMLUtils.convertDocumentToString(docSecond)
                     .replace("&lt;", "<")
                     .replace("&gt;",">");
         else
             return "";
     }
 
-    private List<DiffObject> buildDiffObjects(List<Difference> differences){
-        diff_match_patch dmp = new diff_match_patch();
-        List<DiffObject> diffObjects = new ArrayList<>();
+    private void buildDiffLists(List<Difference> differences,
+                                List<Difference> valueDifferences,
+                                List<Difference> insNodesDiff,
+                                List<Difference> delNodesDiff){
         for(Difference d : differences){
-            if(ComparisonType.TEXT_VALUE.equals(d.getComparison().getType())) {
-                String oldValue = (String) d.getComparison().getControlDetails().getValue();
-                String newValue = (String) d.getComparison().getTestDetails().getValue();
-                LinkedList<diff_match_patch.Diff> diff = dmp.diff_main(oldValue, newValue);
-                dmp.diff_cleanupSemantic(diff);
-
-                DiffObject diffObject = DiffObject
-                        .builder()
-                        .oldValue(oldValue)
-                        .newValue(newValue)
-                        .xpathLocation(d.getComparison().getTestDetails().getXPath())
-                        .differences(diff)
-                        .build();
-                diffObjects.add(diffObject);
+            switch(d.getComparison().getType()){
+                case TEXT_VALUE:
+                    valueDifferences.add(d);
+                    break;
+                case CHILD_LOOKUP:
+                    if(d.getComparison().getControlDetails().getValue() == null)
+                        insNodesDiff.add(d);
+                    else
+                        delNodesDiff.add(d);
+                    break;
             }
         }
-        return diffObjects;
     }
 
-    private String convertDiffObjectToXML(DiffObject diffObject){
-        LinkedList<diff_match_patch.Diff> diff = diffObject.getDifferences();
+    private String convertDiffObjectToXML(Difference difference){
+        diff_match_patch dmp = new diff_match_patch();
+        String oldValue = (String) difference.getComparison().getControlDetails().getValue();
+        String newValue = (String) difference.getComparison().getTestDetails().getValue();
+        LinkedList<diff_match_patch.Diff> diff = dmp.diff_main(oldValue,newValue);
+        dmp.diff_cleanupSemantic(diff);
         String xml = "";
 
         for(diff_match_patch.Diff d : diff){
@@ -95,5 +116,11 @@ public class Diff2XMLServiceImpl implements Diff2XMLService {
             }
         }
         return xml;
+    }
+
+    private void clearDuplicateNodes(List<Node> originalNodes){
+        for(Node node : originalNodes){
+            node.getParentNode().removeChild(node);
+        }
     }
 }

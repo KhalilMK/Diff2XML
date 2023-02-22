@@ -1,7 +1,8 @@
 package com.khalilmohamed.diff2xml.utils;
 
 import org.w3c.dom.Document;
-import org.w3c.dom.NodeList;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xmlunit.builder.DiffBuilder;
@@ -24,14 +25,10 @@ import java.util.List;
 
 public class XMLUtils {
 
-    public static void createDifferenceNodeFromString(String stringNode, String xPathLocation, Document document) throws XPathExpressionException {
+    public static Node getNodeInDocByXPath(String xPathLocation, Document document) throws XPathExpressionException {
         XPath xpath = XPathFactory.newInstance().newXPath();
 
-        NodeList nodes = (NodeList) xpath.evaluate(xPathLocation, document, XPathConstants.NODESET);
-
-        for (int idx = 0; idx < nodes.getLength(); idx++) {
-            nodes.item(idx).setTextContent(stringNode);
-        }
+        return (Node) xpath.evaluate(xPathLocation, document, XPathConstants.NODE);
     }
 
     public static Document createDocumentFromPath(String path) throws ParserConfigurationException, IOException, SAXException {
@@ -75,5 +72,13 @@ public class XMLUtils {
                 .whenElementIsNamed(elementName)
                 .thenUse(ElementSelectors.byNameAndAttributes(attribute))
                 .elseUse(innerSel).build();
+    }
+
+    public static Node createDiffNode(Document fromDoc, Document toDoc, String xpath, String parentXpath, String tagName) throws XPathExpressionException {
+        Node innerNode = toDoc.adoptNode(getNodeInDocByXPath(xpath, fromDoc).cloneNode(true));
+        Element opElement = toDoc.createElement(tagName);
+        opElement.appendChild(innerNode);
+        getNodeInDocByXPath(parentXpath, toDoc).appendChild(opElement);
+        return getNodeInDocByXPath(xpath, fromDoc);
     }
 }
