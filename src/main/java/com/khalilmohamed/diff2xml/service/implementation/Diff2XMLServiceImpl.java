@@ -51,19 +51,19 @@ public class Diff2XMLServiceImpl implements Diff2XMLService {
 
         for(Difference d : delNodesDiff){
             XMLUtils.createDiffNode(docFirst,
-                    docSecond,
-                    d.getComparison().getControlDetails().getXPath(),
-                    d.getComparison().getTestDetails().getParentXPath(), "del");
+                                    docSecond,
+                                    d.getComparison().getControlDetails().getXPath(),
+                                    d.getComparison().getTestDetails().getParentXPath(), "del");
         }
 
         for(Difference d : insNodesDiff){
             duplicateNodes.add(XMLUtils.createDiffNode(docSecond,
-                    docSecond,
-                    d.getComparison().getTestDetails().getXPath(),
-                    d.getComparison().getTestDetails().getParentXPath(),"ins"));
+                                docSecond,
+                                d.getComparison().getTestDetails().getXPath(),
+                                d.getComparison().getTestDetails().getParentXPath(),"ins"));
         }
 
-        //Clear DOCUMENT from duplicate nodes
+        //Clear DOCUMENT by copies of new nodes inserted
         clearDuplicateNodes(duplicateNodes);
 
         //Convert the document with the "git commit" visualization to string replacing the new escape characters
