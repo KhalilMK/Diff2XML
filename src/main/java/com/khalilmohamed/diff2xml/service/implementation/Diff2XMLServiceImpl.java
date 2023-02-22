@@ -32,35 +32,30 @@ public class Diff2XMLServiceImpl implements Diff2XMLService {
         Document docFirst = XMLUtils.createDocumentFromPath(FIRST_FROM_PATH);
         Document docSecond = XMLUtils.createDocumentFromPath(SECOND_FROM_PATH);
 
-        //Get all differences between two xml using XMLUnit and build diffObjects using diff_match_patch
+        //Get all differences between two xml using XMLUnit and build lists for nodes inserted/deleted or with different value
         List<Difference> allDifferences = XMLUtils.getAllDifferences(xmlFirst,xmlSecond);
-        List<Difference> valueDifferences = new ArrayList<>();
-        List<Difference> insNodesDiff = new ArrayList<>();
-        List<Difference> delNodesDiff = new ArrayList<>();
         List<Node> duplicateNodes = new ArrayList<>();
 
-        buildDiffLists(allDifferences, valueDifferences, insNodesDiff, delNodesDiff);
-
-        //For each Difference object, replace the node with the "git commit" visualization
-        for(Difference d : valueDifferences){
-            if(d.getComparison().getTestDetails().getXPath() != null){
-                XMLUtils.getNodeInDocByXPath(d.getComparison().getTestDetails().getXPath(),docSecond)
-                        .setTextContent(convertDiffObjectToXML(d));
+        for(Difference d : allDifferences){
+            switch(d.getComparison().getType()){
+                case TEXT_VALUE: //Replace only the text value of the field
+                    if(d.getComparison().getTestDetails().getXPath() != null){
+                        XMLUtils.getNodeInDocByXPath(d.getComparison().getTestDetails().getXPath(),docSecond)
+                                .setTextContent(convertDiffObjectToXML(d));
+                    }
+                    break;
+                case CHILD_LOOKUP: //Create the inserted nodes (save the node's copy) and the deleted nodes
+                    if(d.getComparison().getControlDetails().getValue() == null)
+                        duplicateNodes.add(XMLUtils.createDiffNode(docSecond, docSecond,
+                                            d.getComparison().getTestDetails().getXPath(),
+                                            d.getComparison().getTestDetails().getParentXPath(), "ins"));
+                    else
+                        XMLUtils.createDiffNode(docFirst, docSecond,
+                                                d.getComparison().getControlDetails().getXPath(),
+                                                d.getComparison().getTestDetails().getParentXPath(), "del");
+                    break;
             }
-        }
 
-        for(Difference d : delNodesDiff){
-            XMLUtils.createDiffNode(docFirst,
-                                    docSecond,
-                                    d.getComparison().getControlDetails().getXPath(),
-                                    d.getComparison().getTestDetails().getParentXPath(), "del");
-        }
-
-        for(Difference d : insNodesDiff){
-            duplicateNodes.add(XMLUtils.createDiffNode(docSecond,
-                                docSecond,
-                                d.getComparison().getTestDetails().getXPath(),
-                                d.getComparison().getTestDetails().getParentXPath(),"ins"));
         }
 
         //Clear DOCUMENT by copies of new nodes inserted
@@ -73,25 +68,6 @@ public class Diff2XMLServiceImpl implements Diff2XMLService {
                     .replace("&gt;",">");
         else
             return "";
-    }
-
-    private void buildDiffLists(List<Difference> differences,
-                                List<Difference> valueDifferences,
-                                List<Difference> insNodesDiff,
-                                List<Difference> delNodesDiff){
-        for(Difference d : differences){
-            switch(d.getComparison().getType()){
-                case TEXT_VALUE:
-                    valueDifferences.add(d);
-                    break;
-                case CHILD_LOOKUP:
-                    if(d.getComparison().getControlDetails().getValue() == null)
-                        insNodesDiff.add(d);
-                    else
-                        delNodesDiff.add(d);
-                    break;
-            }
-        }
     }
 
     private String convertDiffObjectToXML(Difference difference){
