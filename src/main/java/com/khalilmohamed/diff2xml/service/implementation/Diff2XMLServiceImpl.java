@@ -39,9 +39,11 @@ public class Diff2XMLServiceImpl implements Diff2XMLService {
 
         //For each diffObjects, replace the node with the "git commit" visualization
         for(DiffObject d : diffObjects){
-            XMLUtils.createDifferenceNodeFromString(convertDiffObjectToXML(d),
-                                                    d.getXpathLocation(),
-                                                    docOutput);
+            if(d.getXpathLocation() != null){
+                XMLUtils.createDifferenceNodeFromString(convertDiffObjectToXML(d),
+                                                        d.getXpathLocation(),
+                                                        docOutput);
+            }
         }
 
         //Convert the document with the "git commit" visualization to string replacing the new escape characters
@@ -66,6 +68,7 @@ public class Diff2XMLServiceImpl implements Diff2XMLService {
         diff_match_patch dmp = new diff_match_patch();
         List<DiffObject> diffObjects = new ArrayList<>();
         for(Difference d : differences){
+            if(d.getDescription().contains("value")) {
                 String oldValue = d.getControlNodeDetail().getValue();
                 String newValue = d.getTestNodeDetail().getValue();
                 LinkedList<diff_match_patch.Diff> diff = dmp.diff_main(oldValue, newValue);
@@ -79,6 +82,7 @@ public class Diff2XMLServiceImpl implements Diff2XMLService {
                         .differences(diff)
                         .build();
                 diffObjects.add(diffObject);
+            }
         }
         return diffObjects;
     }
