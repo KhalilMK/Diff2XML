@@ -5,10 +5,11 @@ import com.khalilmohamed.diff2xml.service.Diff2XMLService;
 import com.khalilmohamed.diff2xml.utils.FileUtils;
 import com.khalilmohamed.diff2xml.utils.XMLUtils;
 import com.khalilmohamed.diff2xml.utils.diff_match_patch;
-import org.custommonkey.xmlunit.Difference;
 import org.springframework.stereotype.Service;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
+import org.xmlunit.diff.ComparisonType;
+import org.xmlunit.diff.Difference;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPathExpressionException;
@@ -57,9 +58,9 @@ public class Diff2XMLServiceImpl implements Diff2XMLService {
         diff_match_patch dmp = new diff_match_patch();
         List<DiffObject> diffObjects = new ArrayList<>();
         for(Difference d : differences){
-            if(d.getDescription().contains("value")) {
-                String oldValue = d.getControlNodeDetail().getValue();
-                String newValue = d.getTestNodeDetail().getValue();
+            if(d.getComparison().getType().equals(ComparisonType.TEXT_VALUE)) {
+                String oldValue = (String) d.getComparison().getControlDetails().getValue();
+                String newValue = (String) d.getComparison().getTestDetails().getValue();
                 LinkedList<diff_match_patch.Diff> diff = dmp.diff_main(oldValue, newValue);
                 dmp.diff_cleanupSemantic(diff);
 
@@ -67,7 +68,7 @@ public class Diff2XMLServiceImpl implements Diff2XMLService {
                         .builder()
                         .oldValue(oldValue)
                         .newValue(newValue)
-                        .xpathLocation(d.getTestNodeDetail().getXpathLocation())
+                        .xpathLocation(d.getComparison().getTestDetails().getXPath())
                         .differences(diff)
                         .build();
                 diffObjects.add(diffObject);

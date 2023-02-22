@@ -1,12 +1,11 @@
 package com.khalilmohamed.diff2xml.utils;
 
-import org.custommonkey.xmlunit.DetailedDiff;
-import org.custommonkey.xmlunit.Difference;
-import org.custommonkey.xmlunit.XMLUnit;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
+import org.xmlunit.builder.DiffBuilder;
+import org.xmlunit.diff.*;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -55,12 +54,29 @@ public class XMLUtils {
         return null;
     }
 
-    public static List<Difference> getAllDifferences(String xmlFirst, String xmlSecond) throws IOException, SAXException {
-        XMLUnit.setIgnoreWhitespace(true);
-        XMLUnit.setIgnoreAttributeOrder(true);
+    public static List<Difference> getAllDifferences(String xmlFirst, String xmlSecond) {
+        ElementSelector build1 = ElementSelectors.conditionalBuilder()
+                .whenElementIsNamed("property")
+                .thenUse(ElementSelectors.byNameAndAttributes("code"))
+                .elseUse(ElementSelectors.byName).build();
 
-        DetailedDiff diff = new DetailedDiff(XMLUnit.compareXML(xmlFirst, xmlSecond));
+        ElementSelector build2 = ElementSelectors.conditionalBuilder()
+                .whenElementIsNamed("tab")
+                .thenUse(ElementSelectors.byNameAndAttributes("id"))
+                .elseUse(ElementSelectors.byName).build();
 
-        return diff.getAllDifferences();
+        ElementSelector build3 = ElementSelectors.conditionalBuilder()
+                .whenElementIsNamed("field")
+                .thenUse(ElementSelectors.byNameAndAttributes("code"))
+                .elseUse(ElementSelectors.byName).build();
+
+        Diff diff = DiffBuilder
+                        .compare(xmlFirst)
+                        .withTest(xmlSecond)
+                        .ignoreWhitespace().ignoreElementContentWhitespace().ignoreComments()
+                        .withNodeMatcher(new DefaultNodeMatcher(ElementSelectors.and(build1,build3,build2)))
+                        .build();
+
+        return (List<Difference>) diff.getDifferences();
     }
 }
