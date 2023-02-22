@@ -31,7 +31,7 @@ public class Diff2XMLServiceImpl implements Diff2XMLService {
         Document docOutput = XMLUtils.createDocumentFromPath(SECOND_FROM_PATH);
 
         List<Difference> allDifferences = getAllDifferences(xmlFirst,xmlSecond);
-        List<DiffObject> diffObjects = elabDiffObjects(allDifferences);
+        List<DiffObject> diffObjects = buildDiffObjects(allDifferences);
 
         for(DiffObject d : diffObjects){
             XMLUtils.createDifferenceNodeFromString(convertDiffObjectToXML(d),
@@ -56,7 +56,7 @@ public class Diff2XMLServiceImpl implements Diff2XMLService {
         return diff.getAllDifferences();
     }
 
-    private List<DiffObject> elabDiffObjects(List<Difference> differences){
+    private List<DiffObject> buildDiffObjects(List<Difference> differences){
         diff_match_patch dmp = new diff_match_patch();
         List<DiffObject> diffObjects = new ArrayList<>();
         for(Difference d : differences){
