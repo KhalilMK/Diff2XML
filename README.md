@@ -1,4 +1,4 @@
-# Diff2XML - With ElementSelector
+# Diff2XML - Text values, inserted nodes and deleted nodes
 
 ![Version](https://img.shields.io/badge/version-1.0.0-success)
 ![License](https://img.shields.io/github/license/UnimibSoftEngCourse2022/progetto-questionari-1-dev-team)
