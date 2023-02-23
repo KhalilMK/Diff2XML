@@ -69,7 +69,7 @@ public class XMLUtils {
     }
 
     public static ElementSelector buildElementSelector(String elementName, String attribute, ElementSelector innerSel){
-        //Two nodes with a given name are comparable if they have the same value of a given attribute or if they satisfy the innerselector
+        //Two nodes with a given node name are comparable if they have the same value of a given attribute name or if they satisfy the innerselector
         return ElementSelectors.conditionalBuilder()
                 .whenElementIsNamed(elementName)
                 .thenUse(ElementSelectors.byNameAndAttributes(attribute))
