@@ -47,7 +47,7 @@ public class Diff2XMLServiceImpl implements Diff2XMLService {
                 case CHILD_LOOKUP: //Save the inserted node's copy  or create the deleted nodes
                     if(d.getComparison().getControlDetails().getValue() == null)
                         toInsertNodes.add(XMLUtils.getNodeInDocByXPath(d.getComparison().getTestDetails().getXPath(),
-                                          docSecond));
+                                                                       docSecond));
                     else
                         XMLUtils.createDeletedNode(docFirst, docSecond,
                                                    d.getComparison().getControlDetails().getXPath(),
