@@ -50,8 +50,8 @@ public class Diff2XMLServiceImpl implements Diff2XMLService {
                                           docSecond));
                     else
                         XMLUtils.createDeletedNode(docFirst, docSecond,
-                                                d.getComparison().getControlDetails().getXPath(),
-                                                d.getComparison().getTestDetails().getParentXPath());
+                                                   d.getComparison().getControlDetails().getXPath(),
+                                                   d.getComparison().getTestDetails().getParentXPath());
                     break;
             }
         }
