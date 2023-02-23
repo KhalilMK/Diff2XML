@@ -57,7 +57,7 @@ public class Diff2XMLServiceImpl implements Diff2XMLService {
         diff_match_patch dmp = new diff_match_patch();
         List<DiffObject> diffObjects = new ArrayList<>();
         for(Difference d : differences){
-            if(d.getDescription().contains("value")) {
+            if(d.getDescription().contains("text value")) {
                 String oldValue = d.getControlNodeDetail().getValue();
                 String newValue = d.getTestNodeDetail().getValue();
                 LinkedList<diff_match_patch.Diff> diff = dmp.diff_main(oldValue, newValue);
