@@ -28,7 +28,7 @@ public class Diff2XMLServiceImpl implements Diff2XMLService {
         String xmlFirst = FileUtils.readFile(FIRST_FROM_PATH);
         String xmlSecond = FileUtils.readFile(SECOND_FROM_PATH);
 
-        //Create DOCUMENT of the second file (output)
+        //Create DOCUMENT of the two files (output)
         Document docFirst = XMLUtils.createDocumentFromPath(FIRST_FROM_PATH);
         Document docSecond = XMLUtils.createDocumentFromPath(SECOND_FROM_PATH);
 
