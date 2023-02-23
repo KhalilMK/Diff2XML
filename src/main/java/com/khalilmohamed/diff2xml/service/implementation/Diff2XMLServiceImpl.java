@@ -34,7 +34,7 @@ public class Diff2XMLServiceImpl implements Diff2XMLService {
 
         //Get all differences between two xml using XMLUnit and build lists for nodes inserted/deleted or with different value
         List<Difference> allDifferences = XMLUtils.getAllDifferences(xmlFirst,xmlSecond);
-        List<Node> duplicateNodes = new ArrayList<>();
+        List<Node> toInsertNodes = new ArrayList<>();
 
         for(Difference d : allDifferences){
             switch(d.getComparison().getType()){
@@ -44,22 +44,22 @@ public class Diff2XMLServiceImpl implements Diff2XMLService {
                                 .setTextContent(convertDiffObjectToXML(d));
                     }
                     break;
-                case CHILD_LOOKUP: //Create the inserted nodes (save the node's copy) and the deleted nodes
+                case CHILD_LOOKUP: //Save the inserted node's copy  or create the deleted nodes
                     if(d.getComparison().getControlDetails().getValue() == null)
-                        duplicateNodes.add(XMLUtils.createDiffNode(docSecond, docSecond,
-                                            d.getComparison().getTestDetails().getXPath(),
-                                            d.getComparison().getTestDetails().getParentXPath(), "ins"));
+                        toInsertNodes.add(XMLUtils.getNodeInDocByXPath(d.getComparison().getTestDetails().getXPath(),
+                                          docSecond));
                     else
-                        XMLUtils.createDiffNode(docFirst, docSecond,
+                        XMLUtils.createDeletedNode(docFirst, docSecond,
                                                 d.getComparison().getControlDetails().getXPath(),
-                                                d.getComparison().getTestDetails().getParentXPath(), "del");
+                                                d.getComparison().getTestDetails().getParentXPath());
                     break;
             }
-
         }
 
-        //Clear DOCUMENT by copies of new nodes inserted
-        clearDuplicateNodes(duplicateNodes);
+        //Replace inserted nodes with parent node <ins> node </ins>
+        for(Node node : toInsertNodes){
+            XMLUtils.replaceNode(node, docSecond);
+        }
 
         //Convert the document with the "git commit" visualization to string replacing the new escape characters
         if(XMLUtils.convertDocumentToString(docSecond) != null)
@@ -92,11 +92,5 @@ public class Diff2XMLServiceImpl implements Diff2XMLService {
             }
         }
         return xml;
-    }
-
-    private void clearDuplicateNodes(List<Node> originalNodes){
-        for(Node node : originalNodes){
-            node.getParentNode().removeChild(node);
-        }
     }
 }

@@ -74,11 +74,18 @@ public class XMLUtils {
                 .elseUse(innerSel).build();
     }
 
-    public static Node createDiffNode(Document fromDoc, Document toDoc, String xpath, String parentXpath, String tagName) throws XPathExpressionException {
+    public static Node createDeletedNode(Document fromDoc, Document toDoc, String xpath, String parentXpath) throws XPathExpressionException {
         Node innerNode = toDoc.adoptNode(getNodeInDocByXPath(xpath, fromDoc).cloneNode(true));
-        Element opElement = toDoc.createElement(tagName);
+        Element opElement = toDoc.createElement("del");
         opElement.appendChild(innerNode);
         getNodeInDocByXPath(parentXpath, toDoc).appendChild(opElement);
         return getNodeInDocByXPath(xpath, fromDoc);
+    }
+
+    public static void replaceNode(Node node, Document document){
+        Node innerNode = node.cloneNode(true);
+        Element insElement = document.createElement("ins");
+        insElement.appendChild(innerNode);
+        node.getParentNode().replaceChild(insElement, node);
     }
 }
