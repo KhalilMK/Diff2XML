@@ -52,6 +52,7 @@ public class XMLUtils {
     }
 
     public static List<Difference> getAllDifferences(String xmlFirst, String xmlSecond) {
+        //Nested logic of the element selector
         ElementSelector field = buildElementSelector("field", "code", ElementSelectors.byName);
         ElementSelector tab  = buildElementSelector("tab", "id", field);
         ElementSelector property = buildElementSelector("property", "code", tab);
