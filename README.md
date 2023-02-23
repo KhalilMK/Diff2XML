@@ -1,4 +1,4 @@
-# Diff2XML - General purpose
+# Diff2XML - Only text values
 
 ![Version](https://img.shields.io/badge/version-1.0.0-success)
 ![License](https://img.shields.io/github/license/UnimibSoftEngCourse2022/progetto-questionari-1-dev-team)
